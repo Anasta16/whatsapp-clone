@@ -8,7 +8,7 @@ const AppNavigator = (props) => {
         <NavigationContainer>
             <MainNavigator />
         </NavigationContainer>
-    )
-}
+    );
+};
 
 export default AppNavigator;
