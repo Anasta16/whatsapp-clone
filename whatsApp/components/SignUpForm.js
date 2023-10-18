@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import Input from '../components/Input';
 import { Feather, FontAwesome } from '@expo/vector-icons';
 import SubmitButton from '../components/SubmitButton';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { validateInput } from '../utils/actions/formActions';
 import { reducer } from '../utils/reducers/formReducer';
@@ -27,9 +28,10 @@ const initialState = {
 
 const SignUpForm = (props) => {
 
+    const dispatch = useDispatch();
+
     const [error, setError] = useState();
     const [isLoading, setIsLoading] = useState(false);
-
     const [formState, dispatchFormState] = useReducer(reducer, initialState);
 
     const inputChangedHandler = useCallback((inputId, inputValue) => {
@@ -43,22 +45,24 @@ const SignUpForm = (props) => {
         }
     }, [error])
 
-    const authHandler = async () => {
+    const authHandler = useCallback(async () => {
         try {
             setIsLoading(true);
-            await signUp(
+
+            const action = signUp(
                 formState.inputValues.firstName,
                 formState.inputValues.lastName,
                 formState.inputValues.email,
                 formState.inputValues.password
-            );
+            )
+            dispatch(action);
             setError(null);
         }
         catch (error) {
             setError(error.message);
             setIsLoading(false);
         }
-    }
+    }, [dispatch, formState])
 
     return (
         <>
