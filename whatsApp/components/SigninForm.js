@@ -6,19 +6,22 @@ import SubmitButton from '../components/SubmitButton';
 import { validateInput } from '../utils/actions/formActions';
 import { reducer } from '../utils/reducers/formReducer';
 import { signIn } from '../utils/actions/authActions';
-import { Alert } from 'react-native';
+import { ActivityIndicator, Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
+import colors from '../constants/colors';
+
+const isTestMode = true;
 
 const initialState = {
     inputValues: {
-        email: "",
-        password: "",
+        email: isTestMode ? "andrew@gmail.com" : "",
+        password: isTestMode ? "password": "",
     },
     inputValidities: {
-        email: false,
-        password: false,
+        email: isTestMode,
+        password: isTestMode,
     },
-    formIsValid: false
+    formIsValid: isTestMode
 }
 
 const SigninForm = (props) => {
@@ -48,8 +51,8 @@ const SigninForm = (props) => {
                 formState.inputValues.email,
                 formState.inputValues.password
             )
-            dispatch(action);
             setError(null);
+            await dispatch(action);
         }
         catch (error) {
             setError(error.message);
@@ -67,6 +70,7 @@ const SigninForm = (props) => {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 onInputChanged={inputChangedHandler}
+                value={formState.inputValues.email}
                 errorText={formState.inputValidities["email"]}
             />
             <Input
@@ -77,14 +81,20 @@ const SigninForm = (props) => {
                 autoCapitalize="none"
                 secureTextEntry
                 onInputChanged={inputChangedHandler}
+                value={formState.inputValues.password}
                 errorText={formState.inputValidities["password"]}
             />
-            <SubmitButton
-                title="Sign in"
-                onPress={authHandler}
-                style={{ marginTop: 20 }}
-                disabled={!formState.formIsValid}
-            />
+            {
+                isLoading ?
+                    <ActivityIndicator size={'small'} color={colors.primary} style={{ marginTop: 10 }} />
+                :
+                    <SubmitButton
+                        title="Sign in"
+                        onPress={authHandler}
+                        style={{ marginTop: 20 }}
+                        disabled={!formState.formIsValid}
+                    />
+            }
         </>
     )
 }
