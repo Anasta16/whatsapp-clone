@@ -56,7 +56,7 @@ const SettingsScreen = (props) => {
             setIsLoading(true);
             await updateSignedInUserData(userData.userId, updatedValues);
             dispatch(updateLoggedInUserData({newData: updatedValues}));
-            
+
             setShowSuccessMessage(true);
 
             setTimeout(() => {
@@ -89,6 +89,7 @@ const SettingsScreen = (props) => {
                     size={80} 
                     userId={userData.userId} 
                     uri={userData.profilePicture}
+                    showEditButton={true}
                 />
 
                 <Input

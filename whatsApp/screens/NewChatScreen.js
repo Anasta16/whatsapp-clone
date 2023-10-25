@@ -7,6 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import colors from '../constants/colors';
 import commonStyles from '../constants/commonStyles';
 import { searchUsers } from '../utils/actions/userActions';
+import DataItem from '../components/DataItem';
 
 const NewChatScreen = (props) => {
 
@@ -82,8 +83,13 @@ const NewChatScreen = (props) => {
                     data={Object.keys(users)}
                     renderItem={(itemData) => {
                         const userId = itemData.item;
+                        const userData = users[userId];
                         return (
-                            <Text>{userId}</Text>
+                            <DataItem
+                                title={`${userData.firstName} ${userData.lastName}`}
+                                subTitle={`${userData.about}`}
+                                image={userData.profilePicture}
+                            />
                         )
                     }}
                 />
