@@ -1,14 +1,40 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ImageBackground, StyleSheet, View, Button, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
 import backgroundImage from '../assets/images/droplet.jpeg';
 import colors from '../constants/colors';
+import { useSelector } from 'react-redux';
+import PageContainer from '../components/PageContainer';
+import Bubble from '../components/Bubble';
 
 const ChatScreen = (props) => {
 
+    const storedUsers = useSelector(state => state.users.storedUsers);
+    const userData = useSelector(state => state.auth.userData);
+    
+    const [chatUsers, setChatUsers] = useState([]);
     const [messageText, setMessageText] = useState("")
+    const [chatId, setChatId] = useState(props.root?.params?.chatId);
+
+    const chatData = props.route?.params?.newChatData;
+
+    const getChatTitleFromName = () => {
+        const otherUserId = chatUsers.find(uid => uid !== userData.userId);
+        const otherUserData = storedUsers[otherUserId];
+
+        return otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`;
+    }
+
+    useEffect(() => {
+        
+        props.navigation.setOptions({
+            headerTitle: getChatTitleFromName()
+        })
+
+        setChatUsers(chatData.users);
+    }, [chatUsers])
     
     const sendMessage = useCallback(() => {
         setMessageText("");
@@ -27,6 +53,13 @@ const ChatScreen = (props) => {
                 <ImageBackground 
                     source={backgroundImage} 
                     style={styles.backgroundImage}>
+                        <PageContainer style={{ backgroundColor: 'transparent' }}>
+
+                            {
+                                !chatId && <Bubble text="This is a new chat. Say hi!" type="system" />
+                            }
+
+                        </PageContainer>
                 </ImageBackground>
 
                 <View style={styles.InputContainer}>

@@ -2,8 +2,13 @@ import React, { useEffect } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../components/CustomHeaderButton';
+import { useSelector } from 'react-redux';
 
 const ChatListScreen = (props) => {
+
+    const selectedUser = props.route?.params?.selectedUserId;
+
+    const userData = useSelector(state => state.auth.userData);
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -20,6 +25,22 @@ const ChatListScreen = (props) => {
             }
         })
     }, [])
+
+    useEffect(() => {
+
+        if (!selectedUser) {
+            return;
+        }
+
+        const chatUsers = [selectedUser, userData.userId]
+
+        const navigationProps = {
+            newChatData: { users: chatUsers }
+        }
+
+        props.navigation.navigate("ChatScreen", navigationProps);
+
+    }, [props.route?.params])
 
     return (
         <View style={styles.container}>
