@@ -8,6 +8,7 @@ import colors from '../constants/colors';
 import { useSelector } from 'react-redux';
 import PageContainer from '../components/PageContainer';
 import Bubble from '../components/Bubble';
+import { createChat } from '../utils/actions/chatActions';
 
 const ChatScreen = (props) => {
 
@@ -36,9 +37,23 @@ const ChatScreen = (props) => {
         setChatUsers(chatData.users);
     }, [chatUsers])
     
-    const sendMessage = useCallback(() => {
+    const sendMessage = useCallback(async () => {
+
+        try {
+            let id = chatId;
+
+            if (!id) {
+                // no chat Id. Create the chat
+                id = await createChat(userData.userId, props.route.params.newChatData);
+                setChatId(id);
+            }
+        }
+        catch (error) {
+
+        }
+
         setMessageText("");
-    }, [messageText])
+    }, [messageText, chatId])
 
     return (
         <SafeAreaView 
