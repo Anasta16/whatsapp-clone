@@ -36,9 +36,10 @@ const MenuItem = (props) => {
 
 const Bubble = (props) => {
 
-    const { text, type, messageId, chatId, userId, date } = props;
+    const { text, type, messageId, chatId, userId, date, setReply, replyingTo, name } = props;
 
     const starredMessages = useSelector(state => state.messages.starredMessages[chatId] ?? {});
+    const storedUsers = useSelector(state => state.users.storedUsers);
 
     const bubbleStyle = { ...styles.container };
     const textStyle = { ...styles.text };
@@ -49,7 +50,7 @@ const Bubble = (props) => {
 
     let Container = View;
     let isUserMessage = false;
-    const dateString = formatAmPm(date);
+    const dateString = date && formatAmPm(date);
 
     switch (type) {
         case "system":
@@ -76,6 +77,9 @@ const Bubble = (props) => {
             Container = TouchableWithoutFeedback;
             isUserMessage = true;
             break;
+        case "reply":
+            bubbleStyle.backgroundColor = '#f2f2f2'
+            break;
         default: 
             break;
     }
@@ -90,11 +94,27 @@ const Bubble = (props) => {
     }
 
     const isStarred = isUserMessage && starredMessages[messageId] !== undefined;
+    const replyingToUser = replyingTo && storedUsers[replyingTo.sentBy];
 
     return (
         <View style={wrapperStyle}>
             <Container onLongPress={() => menuRef.current.props.ctx.menuActions.openMenu(id.current)} style={{ width: '100%' }}>
                 <View style={bubbleStyle}>
+
+                {
+                    name &&
+                    <Text style={styles.name}>{name}</Text>
+                }
+
+                {
+                    replyingToUser &&
+                    <Bubble 
+                        type='reply'
+                        text={replyingTo.text}
+                        name={`${replyingToUser.firstName} ${replyingToUser.lastName}`}
+                    />
+                }
+
                     <Text style={textStyle}>
                         {text}
                     </Text>
@@ -110,8 +130,23 @@ const Bubble = (props) => {
                     <MenuTrigger />
 
                     <MenuOptions>
-                        <MenuItem text='Copy to clipboard' icon={'copy'} onSelect={() => copyToClipboard(text)} />
-                        <MenuItem text={`${isStarred ? 'Unstar' : 'Star'} message`} icon={isStarred ? 'star' : 'star-o'} iconPack={FontAwesome} onSelect={() => starMessage(messageId, chatId, userId)} />
+                        <MenuItem 
+                            text='Copy to clipboard' 
+                            icon={'copy'} 
+                            onSelect={() => copyToClipboard(text)} 
+                        />
+                        <MenuItem 
+                            text={`${isStarred ? 'Unstar' : 'Star'} message`} 
+                            icon={isStarred ? 'star' : 'star-o'} 
+                            iconPack={FontAwesome} 
+                            onSelect={() => starMessage(messageId, chatId, userId)} 
+                        />
+                        <MenuItem 
+                            text='Reply' 
+                            icon='arrow-left-circle' 
+                            onSelect={setReply} 
+                        />
+
                     </MenuOptions>
 
                 </Menu>
@@ -158,6 +193,10 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
         color: colors.grey,
         fontSize: 12
+    },
+    name: {
+        fontFamily: 'medium',
+        letterSpacing: 0.3
     }
 
 })
