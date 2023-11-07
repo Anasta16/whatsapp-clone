@@ -38,7 +38,7 @@ const ChatScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const flatList = useRef();
-
+  
   const userData = useSelector(state => state.auth.userData);
   const storedUsers = useSelector(state => state.users.storedUsers);
   const storedChats = useSelector(state => state.chats.chatsData);
@@ -71,9 +71,11 @@ const ChatScreen = (props) => {
     return otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`;
   }
 
+  const title = chatData.chatName ?? getChatTitleFromName();
+
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: getChatTitleFromName()
+      headerTitle: title
     })
     setChatUsers(chatData.users)
   }, [chatUsers])
@@ -88,7 +90,7 @@ const ChatScreen = (props) => {
         setChatId(id);
       }
 
-      await sendTextMessage(chatId, userData.userId, messageText, replyingTo && replyingTo.key);
+      await sendTextMessage(id, userData.userId, messageText, replyingTo && replyingTo.key);
 
       setMessageText("");
       setReplyingTo(null);
@@ -152,10 +154,6 @@ const ChatScreen = (props) => {
 
   return (
     <SafeAreaView edges={["right", "left", "bottom"]} style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.screen}
-        behavior={ Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={100}>
         <ImageBackground
           source={backgroundImage}
           style={styles.backgroundImage}
@@ -184,6 +182,9 @@ const ChatScreen = (props) => {
 
                         const messageType = isOwnMessage ? "myMessage" : "theirMessage";
 
+                        const sender = message.sentBy && storedUsers[message.sentBy];
+                        const name = sender && `${sender.firstName} ${sender.lastName}`;
+
                         return (
                             <Bubble  
                                 type={messageType}
@@ -192,6 +193,7 @@ const ChatScreen = (props) => {
                                 userId={userData.userId}
                                 chatId={chatId}
                                 date={message.sentAt}
+                                name={!chatData.isGroupChat || isOwnMessage ? undefined : name}
                                 setReply={() => setReplyingTo(message)}
                                 replyingTo={message.replyTo && chatMessages.find(i => i.key === message.replyTo)}
                                 imageUrl={message.imageUrl}
@@ -278,7 +280,6 @@ const ChatScreen = (props) => {
             />
 
         </View>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
