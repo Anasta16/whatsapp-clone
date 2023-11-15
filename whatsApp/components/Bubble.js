@@ -80,6 +80,11 @@ const Bubble = (props) => {
         case "reply":
             bubbleStyle.backgroundColor = '#f2f2f2'
             break;
+        case "info":
+            bubbleStyle.backgroundColor = 'white';
+            bubbleStyle.alignItems = 'center';
+            textStyle.color = colors.textColor;
+            break;
         default: 
             break;
     }
@@ -102,7 +107,7 @@ const Bubble = (props) => {
                 <View style={bubbleStyle}>
 
                 {
-                    name &&
+                    name && type !== "info" &&
                     <Text style={styles.name}>{name}</Text>
                 }
 
@@ -128,7 +133,7 @@ const Bubble = (props) => {
                 }
 
                 {
-                    dateString && <View style={styles.timeContainer}>
+                    dateString && type !== "info" && <View style={styles.timeContainer}>
                         { isStarred && <FontAwesome name='star' size={14} color={colors.textColor} style={{ marginRight: 5 }} /> }
                         <Text style={styles.time}>{dateString}</Text>
                     </View>

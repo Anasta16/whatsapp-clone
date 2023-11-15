@@ -8,7 +8,7 @@ import Input from '../components/Input';
 import DataItem from '../components/DataItem';
 import { reducer } from '../utils/reducers/formReducer';
 import { validateInput } from '../utils/actions/formActions';
-import { updateChatData } from '../utils/actions/chatActions';
+import { removeUserFromChat, updateChatData } from '../utils/actions/chatActions';
 import colors from '../constants/colors';
 import SubmitButton from '../components/SubmitButton';
 
@@ -17,9 +17,8 @@ const ChatSettingsScreen = (props) => {
     const [isLoading, setIsLoading] = useState(false)
     const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
-
     const chatId = props.route.params.chatId;
-    const chatData = useSelector(state => state.chats.chatsData[chatId]);
+    const chatData = useSelector(state => state.chats.chatsData[chatId] || {});
     const userData = useSelector(state => state.auth.userData);
     const storedUsers = useSelector(state => state.users.storedUsers);
 
@@ -62,6 +61,24 @@ const ChatSettingsScreen = (props) => {
         return currentValues.chatName != chatData.chatName;
     }
 
+    const leaveChat = useCallback(async () => {
+        try {
+            setIsLoading(true);
+
+            await removeUserFromChat(userData, userData, chatData);
+
+            props.navigation.popToTop();
+        }
+        catch (error) {
+            console.log(error)
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }, [props.navigation, isLoading]);
+
+    if (!chatData.users) return null;
+
     return (
         <PageContainer>
             <PageTitle text="Chat Settings" />
@@ -103,7 +120,7 @@ const ChatSettingsScreen = (props) => {
                                     title={`${currentUser.firstName} ${currentUser.lastName}`}
                                     subTitle={currentUser.about}
                                     type={uid !== userData.userId && "link"}
-                                    onPress={() => uid !== userData.userId && props.navigation.navigate("Contact", { uid })}
+                                    onPress={() => uid !== userData.userId && props.navigation.navigate("Contact", { uid, chatId })}
                             />
                         })
                     }
@@ -128,6 +145,15 @@ const ChatSettingsScreen = (props) => {
                 }
 
             </ScrollView>
+
+            {
+                <SubmitButton 
+                    title="Leave chat"
+                    color={colors.red}
+                    onPress={() => leaveChat()}
+                    style={{ marginBottom: 20 }}
+                />
+            }
         </PageContainer>
     )
 }
