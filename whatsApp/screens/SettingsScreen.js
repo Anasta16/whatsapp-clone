@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import PageTitle from '../components/PageTitle';
 import PageContainer from '../components/PageContainer';
@@ -12,6 +12,7 @@ import SubmitButton from '../components/SubmitButton';
 import { updateSignedInUserData, userLogout } from '../utils/actions/authActions';
 import { updateLoggedInUserData } from '../store/authSlice';
 import ProfileImage from '../components/ProfileImage';
+import DataItem from '../components/DataItem';
 
 const SettingsScreen = (props) => {
 
@@ -20,6 +21,20 @@ const SettingsScreen = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const userData = useSelector(state => state.auth.userData);
+    const starredMessages = useSelector(state => state.messages.starredMessages ?? {});
+
+    const sortedStarredMessages = useMemo(() => {
+        let result = [];
+
+        const chats = Object.values(starredMessages);
+
+        chats.forEach(chat => {
+            const chatMessages = Object.values(chat);
+            result = result.concat(chatMessages);
+        })
+
+        return result;
+    }, [starredMessages])
 
     const firstName = userData.firstName || "";
     const lastName = userData.lastName || "";
@@ -149,6 +164,14 @@ const SettingsScreen = (props) => {
                             />
                     }
                 </View>
+
+                <DataItem
+                    type={"link"}
+                    title="Starred messages"
+                    hideImage={true}
+                    onPress={() => props.navigation.navigate("DataList", { title: "Starred messages", data: sortedStarredMessages, type: "messages" })}
+                />
+
                 <SubmitButton
                     title="Logout"
                     onPress={ () => dispatch(userLogout()) }
