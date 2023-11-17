@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useState } from 'react';
+import React, { useReducer, useCallback, useState, useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import PageContainer from '../components/PageContainer';
@@ -8,7 +8,7 @@ import Input from '../components/Input';
 import DataItem from '../components/DataItem';
 import { reducer } from '../utils/reducers/formReducer';
 import { validateInput } from '../utils/actions/formActions';
-import { removeUserFromChat, updateChatData } from '../utils/actions/chatActions';
+import { addUsersToChat, removeUserFromChat, updateChatData } from '../utils/actions/chatActions';
 import colors from '../constants/colors';
 import SubmitButton from '../components/SubmitButton';
 
@@ -29,6 +29,28 @@ const ChatSettingsScreen = (props) => {
     }
 
     const [formState, dispatchFormState] = useReducer(reducer, initialState);
+
+    const selectedUsers = props.route.params && props.route.params.selectedUsers;
+    useEffect(() => {
+        if (!selectedUsers) {
+            return;
+        }
+
+        const selectedUserData = [];
+        selectedUsers.forEach(uid => {
+            if (uid === userData.userId) return;
+
+            if (!storedUsers[uid]) {
+                console.log("No user data found in the data store")
+                return;
+            }
+
+            selectedUserData.push(storedUsers[uid]);
+        });
+
+        addUsersToChat(userData, selectedUserData, chatData);
+
+    }, [selectedUsers])
 
     const inputChangedHandler = useCallback((inputId, inputValue) => {
         const result = validateInput(inputId, inputValue);
@@ -109,6 +131,7 @@ const ChatSettingsScreen = (props) => {
                         title="Add users"
                         icon="plus"
                         type="button"
+                        onPress={() => props.navigation.navigate("NewChat", { isGroupChat: true, existingUsers: chatData.users, chatId })}
                     />
 
                     {

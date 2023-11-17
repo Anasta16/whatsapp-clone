@@ -28,8 +28,12 @@ const NewChatScreen = (props) => {
 
     const selectedUsersFlatList = useRef();
 
+    const chatId = props.route.params && props.route.params.chatId;
+    const existingUsers = props.route.params && props.route.params.existingUsers;
     const isGroupChat = props.route.params && props.route.params.isGroupChat;
-    const isGroupChatDisabled = selectedUsers.length === 0 || chatName === "";
+    const isGroupChatDisabled = selectedUsers.length === 0 || (isNewChat && chatName === "");
+
+    const isNewChat = !chatId;
 
     useEffect(() => {
         props.navigation.setOptions({
@@ -49,13 +53,15 @@ const NewChatScreen = (props) => {
                         {
                             isGroupChat &&
                             <Item 
-                            title="Create"
+                            title={isNewChat ? "Create" : "Add"}
                             disabled={isGroupChatDisabled}
                             color={isGroupChatDisabled ? colors.lightGrey : undefined}
                             onPress={() => {
-                                props.navigation.navigate("ChatList", {
+                                const screenName = isNewChat ? "ChatList" : "ChatSettings";
+                                props.navigation.navigate(screenName, {
                                     selectedUsers,
-                                    chatName
+                                    chatName,
+                                    chatId
                                 })
                             }}
                             />
@@ -116,9 +122,8 @@ const NewChatScreen = (props) => {
         <PageContainer>
 
             {
-                isGroupChat &&
-                <>
-                    <View style={styles.chatNameContainer}>
+                isNewChat && isGroupChat &&
+                <View style={styles.chatNameContainer}>
                         <View style={styles.inputContainer}>
                             <TextInput 
                                 style={styles.textbox}
@@ -129,8 +134,10 @@ const NewChatScreen = (props) => {
                                 onChangeText={(text) => setChatName(text)}
                             />
                         </View>
-                    </View>
-
+                </View>
+            }
+            {
+                isGroupChat &&
                     <View style={styles.selectedUsersContainer}>
                         <FlatList 
                             style={styles.selectedUsersList}
@@ -155,8 +162,7 @@ const NewChatScreen = (props) => {
                             }}
                         />
                     </View>
-                </>
-            }
+                }
 
             <View style={styles.searchContainer}>
                 <FontAwesome name="search" size={15} color={colors.lightGrey} />
@@ -182,6 +188,10 @@ const NewChatScreen = (props) => {
                     renderItem={(itemData) => {
                         const userId = itemData.item;
                         const userData = users[userId];
+
+                        if (existingUsers && existingUsers.includes(userId)) {
+                            return;
+                        }
 
                         return (
                             <DataItem
